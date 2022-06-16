@@ -79,7 +79,10 @@ async def updatelineup(ctx, *Accounts):
 
     for i in range(len(Accounts)):
         if Accounts[i][0] == '#':
-            channel_id = int(rosteredAccounts[Accounts[i]])
+            try:
+                channel_id = int(rosteredAccounts[Accounts[i]])
+            except Exception:
+                pass
             channelname = discord.utils.get(ctx.guild.channels, id = channel_id)
             await channelname.edit(category = Lineup_Category)
 
