@@ -1,7 +1,7 @@
 from tokenize import Name
 from unicodedata import name
 import discord
-import pandas as pd
+#import pandas as pd
 from discord.ext import commands
 import json
 import os
