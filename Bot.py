@@ -6,6 +6,8 @@ from discord.ext import commands
 import json
 import os
 from dotenv import load_dotenv, find_dotenv
+import csv
+import pprint
 
 # Roster = pd.read_excel('Roster.xlsx')
 # Names_List = Roster[Roster.columns[4]].tolist()
@@ -104,6 +106,70 @@ async def getchannels(ctx, *, category: discord.CategoryChannel):
     for i in range(len(channels)):
         await ctx.send(channels[i].name + '    ' + str(channels[i].id))
         print(channels[i].id)
+
+@client.command()
+async def hitrate(ctx):
+    if str(ctx.message.attachments) == "[]": # Checks if there is an attachment on the message
+        return
+    else: # If there is it gets the filename from message.attachments
+        split_v1 = str(ctx.message.attachments).split("filename='")[1]
+        filename = str(split_v1).split("' ")[0]
+        if filename.endswith(".csv"): # Checks if it is a .csv file
+            await ctx.message.attachments[0].save(fp="HRsheets\\{}".format(filename)) # saves the file
+
+def hrcalculation():
+
+    File = open('attacks_8CQPCYP2(1).csv', encoding='utf8')
+    readtemp = csv.reader(File)
+    #print(list(readtemp))
+
+    Att_Clan = 0
+    Def_Clan = 1
+    Att      = 2
+    Def      = 3
+    Att_Tag  = 18
+    Def_Tag  = 19
+    Clan_Tag = 14
+    Opp_Tag  = 15
+    Att_Clan_Tag = 25
+    Def_Clan_Tag = 26
+    Fresh = 24
+    Att_Th = 29
+    Def_Th = 30
+    Stars = 20
+    Stars_Gained = 21
+
+    TARGET_CLAN = '#8CQPCYP2' # Clan tag
+    MODE = 'attack' #offense or defense
+    Triples = {}
+    Occurences = {}
+
+    read = sorted(readtemp, key=lambda elem: elem[Att_Th], reverse=True)
+
+    for row in read:
+        if MODE.lower() == 'attack':
+            mode = Att_Clan_Tag
+            name = Att
+        else:
+            mode = Def_Clan_Tag
+            name = Def
+
+        if row[mode] != TARGET_CLAN:
+            continue
+   
+        if row[Stars_Gained] == '' or row[Att_Th] != row[Def_Th]:
+            continue
+
+        Occurences.setdefault(row[name], 0)
+        Occurences[row[name]] = Occurences[row[name]] + 1
+
+        if int(row[Stars]) == 3 and int(row[Stars_Gained]) != 0:
+            Triples.setdefault(row[name], 0)
+            Triples[row[name]] = Triples[row[name]] + 1
+
+        for i in Occurences.keys():
+            print(i.ljust(20)+ str(Triples.get(i,0))+'/'+ str(Occurences.get(i,0)))
+
 
 with open('Roster_Data.json') as j:
     rosteredAccounts = json.load(j)
