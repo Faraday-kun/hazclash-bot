@@ -73,7 +73,7 @@ async def red(ctx):
     previous_name = ctx.channel.name
     await ctx.channel.edit(name = '🔴' + previous_name[1:])
 
-@client.command(aliases='ul')
+@client.command(aliases=['ul'])
 async def updatelineup(ctx, *Accounts):
 
     global LINEUP_CHANNEL
@@ -103,14 +103,14 @@ async def revert(ctx):
 
 
 
-@client.command(aliases='gc')
+@client.command(aliases=['gc'])
 async def getchannels(ctx, *, category: discord.CategoryChannel):
     channels = category.channels
     for i in range(len(channels)):
         await ctx.send(channels[i].name + '    ' + str(channels[i].id))
         print(channels[i].id)
 
-@client.command(aliases='hr')
+@client.command(aliases=['hr'])
 async def hitrate(ctx, MODE, TARGET_CLAN='us'):
     if str(ctx.message.attachments) == "[]": # Checks if there is an attachment on the message
         return
