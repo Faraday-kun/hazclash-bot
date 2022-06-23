@@ -123,7 +123,7 @@ async def hitrate(ctx, MODE, TARGET_CLAN='us'):
             Output = "\n"
             for i in ATTACKS.keys():
                 Output = Output + "\n" + i.rjust(20) + "\t" + str(TRIPLES.get(i,0)) + '/' + str(ATTACKS.get(i,0))
-            Embed_Output = discord.Embed(title="{0} \n {1}".format(filename, TARGET_CLAN), description="```{0}```".format(Output))
+            Embed_Output = discord.Embed(title="{0} \n {1} \t {3}".format(filename, TARGET_CLAN, MODE), description="```{0}```".format(Output))
             os.remove("HRsheets\\{}".format(filename)) #cleanup
             await ctx.send(embed=Embed_Output)
 
