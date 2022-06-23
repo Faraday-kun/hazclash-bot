@@ -7,7 +7,6 @@ import json
 import os
 from dotenv import load_dotenv, find_dotenv
 import csv
-import pprint
 
 # Roster = pd.read_excel('Roster.xlsx')
 # Names_List = Roster[Roster.columns[4]].tolist()
@@ -108,7 +107,7 @@ async def getchannels(ctx, *, category: discord.CategoryChannel):
         print(channels[i].id)
 
 @client.command()
-async def hitrate(ctx):
+async def hitrate(ctx, MODE, TARGET_CLAN='us'):
     if str(ctx.message.attachments) == "[]": # Checks if there is an attachment on the message
         return
     else: # If there is it gets the filename from message.attachments
@@ -116,12 +115,22 @@ async def hitrate(ctx):
         filename = str(split_v1).split("' ")[0]
         if filename.endswith(".csv"): # Checks if it is a .csv file
             await ctx.message.attachments[0].save(fp="HRsheets\\{}".format(filename)) # saves the file
+            ATTACKS, TRIPLES = hrcalculation("HRsheets\\{}".format(filename), TARGET_CLAN, MODE )
+            Output = "\n"
+            for i in ATTACKS.keys():
+                Output = Output +"\n"+i.rjust(20)+ "\t" +str(TRIPLES.get(i,0))+'/'+ str(ATTACKS.get(i,0))
+            Embed_Output = discord.Embed(title="{0} \n {1}".format(filename, TARGET_CLAN), description="```{0}```".format(Output))
+            os.remove("HRsheets\\{}".format(filename))
+            await ctx.send(embed=Embed_Output)
 
-def hrcalculation():
+@client.command()
+async def displayembed(ctx):
+    embed = discord.Embed(title="Your title here", description="Your desc here") #,color=Hex code
+    embed.add_field(name="Name", value="you can make as much as fields you like to")
+    await ctx.send(embed=embed)
 
-    File = open('attacks_8CQPCYP2(1).csv', encoding='utf8')
-    readtemp = csv.reader(File)
-    #print(list(readtemp))
+
+def hrcalculation(FilePath, TARGET, MODE):
 
     Att_Clan = 0
     Def_Clan = 1
@@ -139,12 +148,17 @@ def hrcalculation():
     Stars = 20
     Stars_Gained = 21
 
-    TARGET_CLAN = '#8CQPCYP2' # Clan tag
-    MODE = 'attack' #offense or defense
     Triples = {}
     Occurences = {}
 
-    read = sorted(readtemp, key=lambda elem: elem[Att_Th], reverse=True)
+    with open(FilePath , encoding='utf8') as File:
+        readtemp = csv.reader(File)
+        read = sorted(readtemp, key=lambda elem: elem[Att_Th], reverse=True)
+
+    if TARGET.lower() == 'us':
+        TARGET_CLAN = read[1][Att_Clan_Tag]
+    else:
+        TARGET_CLAN = read[1][Def_Clan_Tag]
 
     for row in read:
         if MODE.lower() == 'attack':
@@ -167,8 +181,7 @@ def hrcalculation():
             Triples.setdefault(row[name], 0)
             Triples[row[name]] = Triples[row[name]] + 1
 
-        for i in Occurences.keys():
-            print(i.ljust(20)+ str(Triples.get(i,0))+'/'+ str(Occurences.get(i,0)))
+    return (Occurences, Triples)
 
 
 with open('Roster_Data.json') as j:
