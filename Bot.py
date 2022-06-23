@@ -1,3 +1,4 @@
+from ast import alias
 from tokenize import Name
 from unicodedata import name
 import discord
@@ -72,7 +73,7 @@ async def red(ctx):
     previous_name = ctx.channel.name
     await ctx.channel.edit(name = '🔴' + previous_name[1:])
 
-@client.command()
+@client.command(aliases='ul')
 async def updatelineup(ctx, *Accounts):
 
     global LINEUP_CHANNEL
@@ -99,14 +100,14 @@ async def revert(ctx):
 
 
 
-@client.command()
+@client.command(aliases='gc')
 async def getchannels(ctx, *, category: discord.CategoryChannel):
     channels = category.channels
     for i in range(len(channels)):
         await ctx.send(channels[i].name + '    ' + str(channels[i].id))
         print(channels[i].id)
 
-@client.command()
+@client.command(aliases='hr')
 async def hitrate(ctx, MODE, TARGET_CLAN='us'):
     if str(ctx.message.attachments) == "[]": # Checks if there is an attachment on the message
         return
@@ -118,20 +119,16 @@ async def hitrate(ctx, MODE, TARGET_CLAN='us'):
             ATTACKS, TRIPLES = hrcalculation("HRsheets\\{}".format(filename), TARGET_CLAN, MODE )
             Output = "\n"
             for i in ATTACKS.keys():
-                Output = Output +"\n"+i.rjust(20)+ "\t" +str(TRIPLES.get(i,0))+'/'+ str(ATTACKS.get(i,0))
+                Output = Output + "\n" + i.rjust(20) + "\t" + str(TRIPLES.get(i,0)) + '/' + str(ATTACKS.get(i,0))
             Embed_Output = discord.Embed(title="{0} \n {1}".format(filename, TARGET_CLAN), description="```{0}```".format(Output))
-            os.remove("HRsheets\\{}".format(filename))
+            os.remove("HRsheets\\{}".format(filename)) #cleanup
             await ctx.send(embed=Embed_Output)
 
-@client.command()
-async def displayembed(ctx):
-    embed = discord.Embed(title="Your title here", description="Your desc here") #,color=Hex code
-    embed.add_field(name="Name", value="you can make as much as fields you like to")
-    await ctx.send(embed=embed)
 
 
 def hrcalculation(FilePath, TARGET, MODE):
-
+    # Variables for interface with minion bot csv output, These are actually the corresponding column values in the csv
+    # Maybe I should make these in a json outside the script so that they are easier to change if mb updates
     Att_Clan = 0
     Def_Clan = 1
     Att      = 2
@@ -148,6 +145,7 @@ def hrcalculation(FilePath, TARGET, MODE):
     Stars = 20
     Stars_Gained = 21
 
+    #initializers dicts for HRs, Occurences records attacks and Triples records triples
     Triples = {}
     Occurences = {}
 
